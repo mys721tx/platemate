@@ -4,12 +4,10 @@ Django settings for platemate project
 
 import os
 
+from local_settings import (ADMINS, ALLOWED_HOSTS, API_KEY, BASE_PATH,
+                            DATABASES, DEBUG, PYTHONVAR, STATIC_DOC_ROOT,
+                            TEMPLATE_DIRS, URL_PATH)
 from management.mturk import MTurkClient
-
-from local_settings import (
-    ADMINS, ALLOWED_HOSTS, API_KEY, BASE_PATH, DATABASES, DEBUG, PYTHONVAR,
-    STATIC_DOC_ROOT, TEMPLATE_DIRS, URL_PATH
-)
 
 TEMPLATE_DEBUG = DEBUG
 
