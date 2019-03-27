@@ -1,17 +1,10 @@
-import os
 from time import sleep
 
-import django
 from django.db import transaction
 
 from logger import LOOP_CONTROL, LOOP_SETUP, log
 
 from .helpers import with_probability
-
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings")
-
-
-django.setup()
 
 CHECK_FREQ = 15.0
 REFRESH_FREQ = 300.0
