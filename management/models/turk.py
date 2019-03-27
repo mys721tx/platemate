@@ -1,6 +1,10 @@
-from smart_model import SmartModel
-from django.db.models import *
 from django.conf import settings
+from django.db.models import (BooleanField, CharField, DateTimeField,
+                              ForeignKey, GenericIPAddressField,
+                              ManyToManyField, NullBooleanField, TextField)
+
+from .smart_model import SmartModel
+
 
 class Hit(SmartModel):
     template = CharField(max_length=100)
@@ -99,13 +103,12 @@ class Assignment(SmartModel):
     @property
     def feedback(self):
         responses = self.responses.all()
-        if not responses:
-            return "You didn't provide any response."
-        else:
+        if responses:
             for r in responses:
                 if r.valid is False:
                     return r.feedback
             return responses[0].feedback
+        return "You didn't provide any response."
 
 class Response(SmartModel):
     assignment = ForeignKey('Assignment', related_name='responses')

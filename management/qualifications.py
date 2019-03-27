@@ -1,5 +1,6 @@
 from boto.mturk import qualification
 
+
 # QUALIFICATIONS
 # --------------
 def min_approval(score):

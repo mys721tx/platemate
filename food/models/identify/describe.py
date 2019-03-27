@@ -1,24 +1,31 @@
-from food.models.common import *
-from management.helpers import *
-from management.qualifications import *
-import management.models as base
-from urllib import unquote
+from django.db.models import CharField, IntegerField, TextField
 
-class Input(base.Input):
+import management.models.manager as manager
+import management.models.turk as turk
+from food.models.common import Box
+from management.helpers import MINUTE
+from management.models.smart_model import OneOf
+from management.qualifications import locale, min_approval, min_completed
+
+
+class Input(manager.Input):
     box = OneOf(Box)
 
-class Output(base.Output):
+
+class Output(manager.Output):
     box = OneOf(Box)
     desc = CharField(max_length=500)
     ingredients = TextField()
 
-class Job(base.Job):
+
+class Job(turk.Job):
     box = OneOf(Box)
     iteration = IntegerField(default=1)
     desc = CharField(max_length=500, default='')
     ingredients = TextField(default='')
 
-class Response(base.Response):
+
+class Response(turk.Response):
     desc = CharField(max_length=500)
     ingredients = TextField()
 
@@ -30,12 +37,12 @@ class Response(base.Response):
             return "No description for desc item"
         elif self.ingredients == '':
             return "No description for ingredients"
-        #elif self.desc == self.to_job.desc and self.ingredients == self.to_job.ingredients: #or?
+        # elif self.desc == self.to_job.desc and self.ingredients == self.to_job.ingredients: #or?
         #    return "You didn't change anything"
-        else:
-            return True
+        return True
 
-class Manager(base.Manager):
+
+class Manager(manager.Manager):
     #########
     # STATE #
     #########

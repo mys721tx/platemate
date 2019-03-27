@@ -1,21 +1,27 @@
-from food.models.common import *
-from management.helpers import *
-from management.qualifications import *
-import management.models as base
-from urllib import unquote
 from fractions import Fraction
 
-class Input(base.Input):
-    ingredient = OneOf(Ingredient) # without Serving or amount filled in
+import management.models.manager as manager
+import management.models.turk as turk
+from food.models.common import Ingredient, Serving
+from management.helpers import MINUTE, mean, mode
+from management.models.smart_model import OneOf
+from management.qualifications import locale, min_approval, min_completed
 
-class Output(base.Output):
-    ingredient = OneOf(Ingredient) # with Serving and amount filled in
 
-class Job(base.Job):
-    ingredient = OneOf(Ingredient) # without Serving or amount filled in
+class Input(manager.Input):
+    ingredient = OneOf(Ingredient)  # without Serving or amount filled in
 
-class Response(base.Response):
-    ingredient = OneOf(Ingredient) # with Serving and amount filled in
+
+class Output(manager.Output):
+    ingredient = OneOf(Ingredient)  # with Serving and amount filled in
+
+
+class Job(turk.Job):
+    ingredient = OneOf(Ingredient)  # without Serving or amount filled in
+
+
+class Response(turk.Response):
+    ingredient = OneOf(Ingredient)  # with Serving and amount filled in
 
     def validate(self):
         self.raw = (self.measurement, self.serving)
@@ -51,7 +57,8 @@ class Response(base.Response):
         self.save()
         return True
 
-class Manager(base.Manager):
+
+class Manager(manager.Manager):
 
     ################
     # HIT SETTINGS #

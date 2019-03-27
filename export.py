@@ -1,9 +1,8 @@
-from management.models.manager import Input
-from food.models import *
-from management.models.smart_model import OneOf, ManyOf, SmartModel
-from django.core.serializers import serialize
+from .management.models.smart_model import ManyOf, SmartModel
 
 # Takes a list of models
+
+
 def dump(models):
 
     models_seen = set()

@@ -1,14 +1,18 @@
-from food.models.common import *
-import management.models as base
+import management.models.manager as manager
 from food.models import identify
+from food.models.common import Box, IngredientList
+from management.models.smart_model import OneOf
 
-class Input(base.Input):
+
+class Input(manager.Input):
     box = OneOf(Box)
 
-class Output(base.Output):
+
+class Output(manager.Output):
     ingredient_list = OneOf(IngredientList)
 
-class Manager(base.Manager):
+
+class Manager(manager.Manager):
 
     def setup(self):
         self.hire(identify.describe, 'describe')

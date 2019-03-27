@@ -1,23 +1,32 @@
-from food.models.common import *
-from management.helpers import *
-from management.qualifications import *
-import management.models as base
 from urllib import unquote
 
-class Input(base.Input):
+from django.db.models import CharField, TextField
+
+import management.models.manager as manager
+import management.models.turk as turk
+from food.models.common import Box, IngredientList
+from management.helpers import MINUTE
+from management.models.smart_model import ManyOf, OneOf
+from management.qualifications import locale, min_approval, min_completed
+
+
+class Input(manager.Input):
     box = OneOf(Box)
     desc = CharField(max_length=500)
     ingredients = TextField()
 
-class Output(base.Output):
+
+class Output(manager.Output):
     ingredient_lists = ManyOf(IngredientList)
 
-class Job(base.Job):
+
+class Job(turk.Job):
     box = OneOf(Box)
     desc = CharField(max_length=500)
     ingredients = TextField()
 
-class Response(base.Response):
+
+class Response(turk.Response):
     ingredient_list = OneOf(IngredientList)
 
     def validate(self):
@@ -30,15 +39,16 @@ class Response(base.Response):
             box = self.to_job.box
             box.desc = self.to_job.desc
             box.save()
-            self.ingredient_list = IngredientList.from_json(self.selections, box=box)
+            self.ingredient_list = IngredientList.from_json(
+                self.selections, box=box)
 
         num = self.ingredient_list.ingredients.count()
         if num <= 4:
             return True
-        else:
-            return "Too many ingredients entered. Max is 4, you listed %d" % num
+        return "Too many ingredients entered. Max is 4, you listed %d" % num
 
-class Manager(base.Manager):
+
+class Manager(manager.Manager):
 
     ################
     # HIT SETTINGS #
@@ -74,6 +84,7 @@ class Manager(base.Manager):
         for job in self.completed_jobs:
             responses = job.valid_responses.all()
             self.finish(
-                ingredient_lists=[response.ingredient_list for response in responses],
+                ingredient_lists=[
+                    response.ingredient_list for response in responses],
                 from_job=job,
             )

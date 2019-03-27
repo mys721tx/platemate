@@ -1,9 +1,10 @@
-from Errors import *
-from TokenStore import *
-from oauth import oauth
-from OAuth import *
-import urllib
 import httplib
+
+from oauth import oauth
+
+from .Errors import BuildError
+from .OAuth import FSRequest, FSToken, FSRequest
+
 try:
     import json
 except ImportError:
@@ -190,8 +191,7 @@ class FatSecretClient(object):
 
         if not len(args):
             return result
-        else:
-            return None
+        return None
 
     def _auth_request(self, **parameters):
         http_method = parameters.pop('HTTP_METHOD', self.HTTP_METHOD)

@@ -1,8 +1,11 @@
-import os, sys
+import os
+
 from django.conf import settings
 from PIL import Image
-from models.common import *
+
 import platemate_constants
+from .models.common import Box, BoxGroup, Ingredient, User
+
 
 def is_authenticated_api_request(request):
     return ('HTTP_X_API_KEY' in request.META and request.META['HTTP_X_API_KEY'] == settings.API_KEY)
@@ -12,10 +15,9 @@ def create_or_get_api_user():
     api_user_exists = User.objects.filter(username=api_user_name).exists()
     if api_user_exists:
         return User.objects.get(username=api_user_name)
-    else:
-        api_user = User(username=api_user_name)
-        api_user.save()
-        return api_user
+    api_user = User(username=api_user_name)
+    api_user.save()
+    return api_user
 
 def process_photo_and_get_url(photo, sub_dir, photo_name):
     photo_dir_name = os.path.join(settings.STATIC_DOC_ROOT, sub_dir)
@@ -99,5 +101,4 @@ def get_status_for_submission(submission):
         return 'COMPLETED'
     elif submission.processed is not None:
         return 'PROCESSING'
-    else:
-        return 'SUBMITTED'
+    return 'SUBMITTED'

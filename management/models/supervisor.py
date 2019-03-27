@@ -1,13 +1,14 @@
-from management import qualifications
-from management.helpers import *
-from management.models.turk import *
-from django.db.models import Min
-from logger import *
-from turk import Hit
-from django.conf import settings
-from django.db import transaction
 from datetime import datetime
 from time import sleep
+
+from django.conf import settings
+from django.db import transaction
+from django.db.models import Min
+
+from logger import MANAGER_CONTROL, TURK_CONTROL, log
+from management.helpers import MINUTE, DAY
+from .turk import Hit, Job, Worker
+
 
 class Supervisor(object):
 
@@ -71,7 +72,9 @@ class Supervisor(object):
 
         # If at least one job has been waiting too long, create a HIT out of all remaining jobs
         if self.waiting_jobs:
-            earliest_job = self.waiting_jobs.aggregate(Min('creation_time'))['creation_time__min']
+            earliest_job = self.waiting_jobs.aggregate(
+                Min('creation_time')
+            )['creation_time__min']
             time_elapsed = datetime.now() - earliest_job
             if time_elapsed.seconds >= self.max_wait:
                 self.create_hit(self.waiting_jobs)
@@ -85,7 +88,12 @@ class Supervisor(object):
 
     @transaction.atomic
     def refresh_hits(self):
-        log(u"Refreshing HITs for %s" % (self.__class__.__name__), TURK_CONTROL)
+        log(
+            u"Refreshing HITs for {}".format(
+                self.__class__.__name__
+            ),
+            TURK_CONTROL
+        )
         for jobcount in range(self.batch_size):
             dummy = Job()
             jobs = [dummy] * (jobcount + 1)
@@ -123,11 +131,21 @@ class Supervisor(object):
         hit.save()
 
         if announce:
-            log(u"""Created HIT %d with %d jobs and %d assignments
-                External URL: %s
-                Turk ID: %s
-                Turk URL: %s
-                Type: %s""" % (hit.id, len(jobs), self.duplication, hit.external_url, hit.turk_id, hit.turk_url, self.__class__.__name__), MANAGER_CONTROL)
+            log(u"""Created HIT {} with {} jobs and {} assignments
+                External URL: {}
+                Turk ID: {}
+                Turk URL: {}
+                Type: {}""".format(
+                    hit.id,
+                    len(jobs),
+                    self.duplication,
+                    hit.external_url,
+                    hit.turk_id,
+                    hit.turk_url,
+                    self.__class__.__name__
+                ),
+                MANAGER_CONTROL
+            )
 
         # TODO(jon): error handling
         return hit
@@ -145,7 +163,9 @@ class Supervisor(object):
             if hit.assignments.filter(turk_id=id):
                 continue
 
-            worker, created = Worker.objects.get_or_create(turk_id=answers.pop('worker_id'))
+            worker, _ = Worker.objects.get_or_create(
+                turk_id=answers.pop('worker_id')
+            )
             worker.country = answers.pop('country')
             worker.os = answers.pop('os')
             worker.browser = answers.pop('browser')
@@ -159,13 +179,23 @@ class Supervisor(object):
             asst.worker = worker
             asst.save()
 
-            log(u'Recording assignment %s on HIT %s from worker %s...' % (asst.turk_id, hit.turk_id, worker.turk_id), MANAGER_CONTROL)
+            log(
+                u'Recording assignment {} on HIT {} from worker {}...'.format(
+                    asst.turk_id,
+                    hit.turk_id,
+                    worker.turk_id
+                ),
+                MANAGER_CONTROL
+            )
 
             responses = {}
             for key, value in answers.items():
                 job_id, field = key.split('_', 1)
                 job = hit.jobs.get(pk=job_id)
-                responses[job_id] = responses.get(job_id, self.Response(assignment=asst, job=job))
+                responses[job_id] = responses.get(
+                    job_id,
+                    self.Response(assignment=asst, job=job)
+                )
                 setattr(responses[job_id], field, value)
                 log(u"  %s_%s = []" % (job_id, field), MANAGER_CONTROL)
 
@@ -186,12 +216,21 @@ class Supervisor(object):
         if asst.valid:
             self.turk.approve(asst.turk_id, asst.feedback)
             asst.approved = True
-            log(u'Approved assignment %s ' % asst.turk_id, MANAGER_CONTROL)
+            log(
+                u'Approved assignment {}'.format(asst.turk_id),
+                MANAGER_CONTROL
+            )
         else:
             self.turk.reject(asst.turk_id, asst.feedback)
-            #self.turk.extend_hit(asst.hit.turk_id, 1) Commented out because generally hits are rejected because of bad photo data, don't want hit to advance.
+            # self.turk.extend_hit(asst.hit.turk_id, 1) Commented out because generally hits are rejected because of bad photo data, don't want hit to advance.
             asst.approved = False
-            log(u'Rejected assignment %s because %s' % (asst.turk_id, asst.feedback), MANAGER_CONTROL)
+            log(
+                u'Rejected assignment {} because {}'.format(
+                    asst.turk_id,
+                    asst.feedback
+                ),
+                MANAGER_CONTROL
+            )
         asst.save()
 
     @transaction.atomic

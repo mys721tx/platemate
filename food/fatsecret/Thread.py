@@ -1,6 +1,7 @@
-import threading
-import inspect
 import ctypes
+import inspect
+import threading
+
 
 def _async_raise(tid, exctype):
     """raises the exception, performs cleanup if needed"""

@@ -1,9 +1,8 @@
-from food.models.common import *
-import management.models as base
-from food.models import tag, identify, measure
+import management.models.manager as base
+from food.models import identify
+from food.models.common import Box, Photo, IngredientList
+from management.models.smart_model import OneOf
 
-from django.conf import settings
-import os, glob
 
 class Output(base.Output):
     photo = OneOf(Photo)

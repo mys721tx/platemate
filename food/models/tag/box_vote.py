@@ -1,30 +1,35 @@
-from food.models.common import *
-from management.helpers import *
-from management.qualifications import *
-import management.models as base
-import box_draw as draw
+import management.models.manager as manager
+import management.models.turk as turk
+from food.models.common import BoxGroup
+from management.helpers import MINUTE, mode
+from management.models.smart_model import ManyOf, OneOf
+from management.qualifications import locale, min_approval, min_completed
 
-class Input(base.Input):
+
+class Input(manager.Input):
     box_groups = ManyOf(BoxGroup)
 
-class Output(base.Output):
+
+class Output(manager.Output):
     box_group = OneOf(BoxGroup)
 
-class Job(base.Job):
+
+class Job(turk.Job):
     box_groups = ManyOf(BoxGroup)
 
-class Response(base.Response):
+
+class Response(turk.Response):
     box_group = OneOf(BoxGroup)
 
     def validate(self):
         self.raw = self.box_group_id
         if self.box_group_id == '':
             return 'No vote provided'
-        else:
-            self.box_group = BoxGroup.objects.get(id=self.box_group_id)
-            return True
+        self.box_group = BoxGroup.objects.get(id=self.box_group_id)
+        return True
 
-class Manager(base.Manager):
+
+class Manager(manager.Manager):
 
     ################
     # HIT SETTINGS #
@@ -57,7 +62,9 @@ class Manager(base.Manager):
 
         for job in self.completed_jobs:
             if self.duplication > 1:
-                choices = [response.box_group for response in job.valid_responses]
+                choices = [
+                    response.box_group for response in job.valid_responses
+                ]
                 bg = mode(choices)
             else:
                 bg = job.valid_response.box_group

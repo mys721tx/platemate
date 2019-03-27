@@ -5,7 +5,7 @@ from management.mturk import MTurkClient
 BASE_PATH = os.path.dirname(os.path.abspath(__file__))
 
 # Should be False for production
-DEBUG = (lambda : os.getenv("DEBUG", "false").lower() == "true")()
+DEBUG = (lambda: os.getenv("DEBUG", "false").lower() == "true")()
 
 ADMINS = (
     (os.getenv("ADMIN_NAME", "John Doe"), os.getenv("ADMIN_EMAIL", "user@example.com")),

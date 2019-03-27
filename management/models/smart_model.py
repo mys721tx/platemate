@@ -1,12 +1,10 @@
-from django.db import models
-from django.db.models import *
-from django.db.models.base import ModelBase
-from django.db.models.query import QuerySet
-from django.contrib.contenttypes.models import ContentType
-from django.db import transaction
-from downcast import DowncastMetaclass
-from pprint import pprint
 import sys
+
+from django.db import transaction
+from django.db.models import Field, ForeignKey, ManyToManyField, Model
+
+from .downcast import DowncastMetaclass
+
 
 class SmartMetaclass(DowncastMetaclass):
 
@@ -49,8 +47,12 @@ class SmartMetaclass(DowncastMetaclass):
             attrs['step'] = '%s.%s' % (category, base_name)
             name = '%s_%s' % (base_name, name)
 
-        #if name in ['Job','Response','Input','Output']:
-        attrs['_fields'] = [(field_name, value) for (field_name, value) in attrs.items() if hasattr(value, '__class__') and issubclass(value.__class__, Field)]
+        # if name in ['Job','Response','Input','Output']:
+        attrs['_fields'] = [
+            (field_name, value)
+            for (field_name, value) in attrs.items()
+            if hasattr(value, '__class__') and issubclass(value.__class__, Field)
+        ]
 
         # Lets us split modules into different files
         if 'Meta' not in attrs:
@@ -60,6 +62,7 @@ class SmartMetaclass(DowncastMetaclass):
         # Automatic downcasting for polymorphic models
         # (handled by parent)
         return super(SmartMetaclass, cls).__new__(cls, name, bases, attrs)
+
 
 class SmartModel(Model):
     __metaclass__ = SmartMetaclass
@@ -76,6 +79,7 @@ class SmartModel(Model):
     class Meta:
         abstract = True
 
+
 class OneOf(ForeignKey):
 
     def __init__(self, *args, **kwargs):
@@ -83,9 +87,10 @@ class OneOf(ForeignKey):
         kwargs['null'] = True
         super(OneOf, self).__init__(*args, **kwargs)
 
+
 class ManyOf(ManyToManyField):
 
     def __init__(self, *args, **kwargs):
-        #if 'related_name' not in kwargs:
+        # if 'related_name' not in kwargs:
         #    kwargs['related_name'] = '+'
         super(ManyOf, self).__init__(*args, **kwargs)

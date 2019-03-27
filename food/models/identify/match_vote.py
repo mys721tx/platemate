@@ -1,20 +1,26 @@
-from food.models.common import *
-from management.helpers import *
-from management.qualifications import *
-import management.models as base
-from urllib import unquote
 from django.core.exceptions import ObjectDoesNotExist
 
-class Input(base.Input):
+import management.models.manager as manager
+import management.models.turk as turk
+from food.models.common import IngredientList
+from management.helpers import MINUTE, mode
+from management.models.smart_model import ManyOf, OneOf
+from management.qualifications import locale, min_approval, min_completed
+
+
+class Input(manager.Input):
     ingredient_lists = ManyOf(IngredientList)
 
-class Output(base.Output):
+
+class Output(manager.Output):
     ingredient_list = OneOf(IngredientList)
 
-class Job(base.Job):
+
+class Job(turk.Job):
     ingredient_lists = ManyOf(IngredientList)
 
-class Response(base.Response):
+
+class Response(turk.Response):
     ingredient_list = OneOf(IngredientList)
 
     def validate(self):
@@ -22,13 +28,15 @@ class Response(base.Response):
         if self.ingredients_choice in ['', ' ', None]:
             return "No choice of ingredients provided"
         try:
-            self.ingredient_list = IngredientList.objects.get(pk=self.ingredients_choice)
+            self.ingredient_list = IngredientList.objects.get(
+                pk=self.ingredients_choice)
         except ObjectDoesNotExist:
             return "Invalid choice entered"
 
         return True
 
-class Manager(base.Manager):
+
+class Manager(manager.Manager):
 
     ################
     # HIT SETTINGS #
@@ -62,12 +70,13 @@ class Manager(base.Manager):
         for job in self.completed_jobs:
 
             if self.duplication > 1:
-                choices = [response.ingredient_list for response in job.valid_responses]
+                choices = [
+                    response.ingredient_list for response in job.valid_responses]
                 il = mode(choices)
             else:
                 il = job.valid_response.ingredient_list
 
             self.finish(
                 ingredient_list=il,
-                from_job=job,
+                from_job=job
             )

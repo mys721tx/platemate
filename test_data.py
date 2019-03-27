@@ -1,12 +1,14 @@
 import os
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings")
-from django.conf import settings
+from datetime import datetime
 
-from django.db import connection
+#from django.conf import settings
 from django.contrib.auth.models import User
-from management.models import *
-from food.models.common import *
-from food.models import *
+#from django.db import connection
+
+from .food.models.common import (BoxGroup, Food, Ingredient, IngredientList,
+                                 Photo, Submission)
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings")
 
 # Tag - Draw
 p = Photo.from_string("http://www.platebrain.com/pictures/pilot/pilot1.jpg")
@@ -183,12 +185,18 @@ s.save()
 s.measured_ingredients.add(i)
 s.measured_ingredients.add(i_butter)
 
-photo8 = Photo.from_string("http://www.platebrain.com/pictures/pilot/pilot8.jpg")
+photo8 = Photo.from_string(
+    "http://www.platebrain.com/pictures/pilot/pilot8.jpg")
 boxes8 = BoxGroup.from_json('{"0":{"x1":165,"y1":1,"x2":332,"y2":128,"width":167,"height":127},"1":{"x1":227,"y1":90,"x2":370,"y2":261,"width":143,"height":171},"2":{"x1":146,"y1":150,"x2":256,"y2":297,"width":110,"height":147},"3":{"x1":105,"y1":207,"x2":204,"y2":298,"width":99,"height":91},"4":{"x1":81,"y1":4,"x2":214,"y2":199,"width":133,"height":195}}', photo8)
 box8 = boxes8.boxes.all()[0]
 
 carrots_f = Food.get_food(6037)
-carrots_i = Ingredient(food=carrots_f, serving=carrots_f.servings()[1], amount=0.5, box=box8)
+carrots_i = Ingredient(
+    food=carrots_f,
+    serving=carrots_f.servings()[1],
+    amount=0.5,
+    box=box8
+)
 carrots_i.save()
 carrots_l = IngredientList(box=box8)
 carrots_l.save()

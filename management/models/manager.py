@@ -1,7 +1,9 @@
-from smart_model import SmartModel
-from django.db.models import *
-from logger import *
-from supervisor import Supervisor
+from django.db.models import DateTimeField, BooleanField, ForeignKey, CharField, ManyToManyField
+
+from logger import log, MANAGER_CONTROL
+from .smart_model import SmartModel
+from .supervisor import Supervisor
+
 
 class Input(SmartModel):
     creation_time = DateTimeField(auto_now_add=True)
@@ -10,6 +12,7 @@ class Input(SmartModel):
     @property
     def manager(self):
         return self.managers.all()[0]
+
 
 class Output(SmartModel):
     creation_time = DateTimeField(auto_now_add=True)
@@ -20,14 +23,14 @@ class Output(SmartModel):
     def manager(self):
         return self.managers.all()[0]
 
+
 class Manager(SmartModel, Supervisor):
 
     @property
     def level(self):
         if self.name == 'chief':
             return 0
-        else:
-            return 1 + self.boss.level
+        return 1 + self.boss.level
 
     def work(self):
         pass
@@ -58,9 +61,10 @@ class Manager(SmartModel, Supervisor):
         "Returns an ordered list of outputs from this manager and its employees"
         outputs = []
         for employee in self.employees.order_by('id'):
-            outputs += employee.get_outputs(**conditions) # Add all his employees' outputs
+            # Add all his employees' outputs
+            outputs += employee.get_outputs(**conditions)
         my_output = Output.objects.filter(managers=self, **conditions)
-        outputs += my_output # Add this manager's output
+        outputs += my_output  # Add this manager's output
         return outputs
 
     def __unicode__(self):

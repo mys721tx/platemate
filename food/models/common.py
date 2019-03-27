@@ -1,13 +1,21 @@
-from django.db.models import *
+import math
+from datetime import datetime
+
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
-from food.food_db import *
-from management.models import SmartModel, Manager
-from management.helpers import *
-import json
-from management.models.smart_model import OneOf, ManyOf
-from logger import *
-from datetime import date
+from django.db.models import (BooleanField, CharField, DateField,
+                              DateTimeField, FloatField, ForeignKey,
+                              IntegerField, ManyToManyField, URLField)
+
+from food.food_db import FoodDb
+from management.models.manager import Manager
+from management.models.smart_model import ManyOf, OneOf, SmartModel
+
+try:
+    import json
+except ImportError:
+    import simplejson as json
+
 
 PHOTO_WIDTH = 400
 PHOTO_HEIGHT = 300
@@ -20,6 +28,7 @@ MEAL_CHOICES = (
     ('S', 'Snacks'),
 )
 
+
 class Submission(SmartModel):
     # Submitted data
     user = OneOf(User)
@@ -30,8 +39,10 @@ class Submission(SmartModel):
     # Turk answers
     manager = ForeignKey(Manager, related_name='submissions', null=True)
     tagged_boxes = OneOf('BoxGroup', null=True)
-    identified_ingredients = ManyOf('Ingredient', related_name='identified_for_submissions')
-    measured_ingredients = ManyOf('Ingredient', related_name='measured_for_submissions')
+    identified_ingredients = ManyOf(
+        'Ingredient', related_name='identified_for_submissions')
+    measured_ingredients = ManyOf(
+        'Ingredient', related_name='measured_for_submissions')
 
     # User answers
     manual = BooleanField(default=False)
@@ -85,8 +96,7 @@ class Submission(SmartModel):
             self.completed = datetime.now()
             self.save()
             return True
-        else:
-            return False
+        return False
 
     def announce_completed(self):
         if not self.user.email:
@@ -105,6 +115,7 @@ class Submission(SmartModel):
     def __str__(self):
         return self.get_meal_display() + " on " + str(self.date) + " for " + self.user.username
 
+
 class Photo(SmartModel):
     photo_url = URLField(verbose_name="Photo URL")
 
@@ -121,6 +132,7 @@ class Photo(SmartModel):
         p.photo_url = url
         p.save()
         return p
+
 
 class Box(SmartModel):
     x = IntegerField(null=True)
@@ -166,6 +178,7 @@ class Box(SmartModel):
 
     def __str__(self):
         return '(%d, %d) %d x %d' % (self.x, self.y, self.width, self.height)
+
 
 class BoxGroup(SmartModel):
     boxes = ManyOf(Box, related_name='groups')
@@ -238,6 +251,7 @@ class BoxGroup(SmartModel):
 
         return score ** (1.0 / num_boxes)
 
+
 """
 The food models are a little weird, so here's a quick rundown of how they work:
     * Food, Serving, FoodSearchResults, and FoodSearchResult represent our
@@ -260,10 +274,12 @@ The food models are a little weird, so here's a quick rundown of how they work:
       - IngredientList is a list of ingredients in a Box.
 """
 
+
 class Food(SmartModel):
-    food_id = IntegerField(primary_key=True) # matches food_id from FatSecret
-    food_name = CharField(max_length="500") # matches food_name from FatSecret
-    food_description = CharField(max_length="500") #matches food_description from FatSecret
+    food_id = IntegerField(primary_key=True)  # matches food_id from FatSecret
+    food_name = CharField(max_length="500")  # matches food_name from FatSecret
+    # matches food_description from FatSecret
+    food_description = CharField(max_length="500")
 
     def __str__(self):
         return self.food_name
@@ -281,7 +297,8 @@ class Food(SmartModel):
                 results_list = [results["foods"]["food"]]
             else:
                 results_list = results["foods"]["food"]
-            food_results = FoodSearchResults.from_db_results(query, results_list)
+            food_results = FoodSearchResults.from_db_results(
+                query, results_list)
         return food_results.get_results()
 
     @staticmethod
@@ -340,6 +357,7 @@ class Food(SmartModel):
 
             new_serving.save()
 
+
 class Serving(SmartModel):
     food = ForeignKey('Food')
     measurement_description = CharField(max_length="200")
@@ -372,6 +390,7 @@ class Serving(SmartModel):
 
         #self.food.food_name + ': ' + self.measurement_description + ' (' + str(self.calories) + ' cal)'
 
+
 class FoodSearchResults(SmartModel):
     search_term = CharField(max_length="200", primary_key=True)
     search_results = ManyToManyField(Food, through='FoodSearchResult')
@@ -388,9 +407,11 @@ class FoodSearchResults(SmartModel):
         results_item.save()
         for (counter, result) in enumerate(results):
             food_item = Food.from_search_result(result)
-            res = FoodSearchResult(food=food_item, results=results_item, ordering=counter)
+            res = FoodSearchResult(
+                food=food_item, results=results_item, ordering=counter)
             res.save()
         return results_item
+
 
 class FoodSearchResult(SmartModel):
     food = ForeignKey(Food)
@@ -400,13 +421,14 @@ class FoodSearchResult(SmartModel):
     def __str__(self):
         return self.food.food_name + "(" + str(self.ordering) + ")"
 
+
 class Ingredient(SmartModel):
     food = OneOf(Food)
     serving = OneOf(Serving)
     amount = FloatField(null=True)
     box = OneOf(Box)
-    from_turk = BooleanField(default=True) # False when user added
-    hidden = BooleanField(default=False) # True when user deleted
+    from_turk = BooleanField(default=True)  # False when user added
+    hidden = BooleanField(default=False)  # True when user deleted
 
     @property
     def submission(self):
@@ -422,8 +444,8 @@ class Ingredient(SmartModel):
     def __str__(self):
         if self.serving and self.amount:
             return '%.2f * %s of %s = %d cal' % (self.amount, self.serving.serving_description, self.food, self.calories)
-        else:
-            return str(self.food)
+        return str(self.food)
+
 
 class IngredientList(SmartModel):
     ingredients = ManyOf(Ingredient, related_name='list')

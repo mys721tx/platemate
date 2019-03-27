@@ -1,11 +1,14 @@
 import os
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings")
-from django.conf import settings
-
 import sys
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings")
+
+from django.conf import settings
 from django.db import connection
-from management.models import *
-from logger import *
+
+from .logger import log, TURK_CONTROL
+from .management.models.manager import Manager
+from .management.models.turk import Hit
 
 operation = sys.argv[1]
 use_sandbox = (sys.argv[-1] != 'real')

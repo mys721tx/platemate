@@ -1,19 +1,26 @@
-from food.models.common import *
-from management.helpers import *
-from management.qualifications import *
-import management.models as base
 from urllib import unquote
 
-class Input(base.Input):
+import management.models.manager as manager
+import management.models.turk as turk
+from food.models.common import Photo, BoxGroup
+from management.models.smart_model import OneOf, ManyOf
+from management.helpers import MINUTE
+from management.qualifications import locale, min_approval, min_completed
+
+
+class Input(manager.Input):
     photo = OneOf(Photo)
 
-class Output(base.Output):
+
+class Output(manager.Output):
     box_groups = ManyOf(BoxGroup)
 
-class Job(base.Job):
+
+class Job(turk.Job):
     photo = OneOf(Photo)
 
-class Response(base.Response):
+
+class Response(turk.Response):
     box_group = OneOf(BoxGroup)
 
     def validate(self):
@@ -22,11 +29,12 @@ class Response(base.Response):
 
         # Try to Parse JSON
         if self.box_group_json == '':
-            #return "No boxes drawn"
+            # return "No boxes drawn"
             self.box_group = BoxGroup.factory(photo=self.to_job.photo)
             return True
         else:
-            self.box_group = BoxGroup.from_json(self.box_group_json, photo=self.to_job.photo)
+            self.box_group = BoxGroup.from_json(
+                self.box_group_json, photo=self.to_job.photo)
 
         # Remove duplicates
         boxes = self.box_group.boxes.all()[:]
@@ -54,12 +62,13 @@ class Response(base.Response):
 
         # If there's anything left, approve
         if self.box_group.boxes.count() == 0:
-            #return "No boxes drawn"
+            # return "No boxes drawn"
             return True
         else:
-            return True
+            return True # why?
 
-class Manager(base.Manager):
+
+class Manager(manager.Manager):
 
     ################
     # HIT SETTINGS #
@@ -92,4 +101,7 @@ class Manager(base.Manager):
         for hit in self.completed_hits:
             for job in hit.jobs.all():
                 answers = job.valid_responses
-                self.finish(box_groups=[answer.box_group for answer in answers], from_job=job)
+                self.finish(
+                    box_groups=[answer.box_group for answer in answers],
+                    from_job=job,
+                )

@@ -1,5 +1,4 @@
-from django.core.exceptions import ObjectDoesNotExist
-from fatsecret import *
+from fatsecret import FatSecretApplication, FatSecretClient
 
 class PlateMateApp(FatSecretApplication):
     key = "a622119cca9648ee8c7aef7fc7aeb957"

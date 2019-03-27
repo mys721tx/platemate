@@ -1,15 +1,21 @@
-from food.models.common import *
-import management.models as base
-from food.models import tag, identify, measure
+import glob
+import os
+import random
 
 from django.conf import settings
-import os, glob, random
+from django.db.models import CharField
 from PIL import Image
 
-class Output(base.Output):
+import management.models.manager as manager
+from food.models import identify, measure, tag
+from food.models.common import IngredientList, Photo
+from management.models.smart_model import OneOf
+
+
+class Output(manager.Output):
     ingredient_list = OneOf(IngredientList)
 
-class Manager(base.Manager):
+class Manager(manager.Manager):
 
     photoset = CharField(max_length=100)
 

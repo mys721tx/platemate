@@ -1,11 +1,3 @@
-from oauth import oauth
-import urllib
-import httplib
-try:
-    import json
-except ImportError:
-    import simplejson as json
-
 class FatSecretError(ValueError):
     def __init__(self, code, message, errorObj):
         self.errorCode = int(code)

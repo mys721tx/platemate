@@ -1,6 +1,8 @@
-from food.models.common import *
-import management.models as base
-from food.models import tag, identify, measure
+import management.models.manager as base
+from food.models import identify, measure, tag
+from food.models.common import (BoxGroup, Food, Ingredient, IngredientList,
+                                Photo)
+
 
 class Manager(base.Manager):
 

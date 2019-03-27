@@ -1,19 +1,25 @@
 # Modules
 # -------
-from boto.mturk.connection import MTurkConnection, MTurkRequestError
-from boto.mturk.question import ExternalQuestion
+import sys
+#import traceback
+from datetime import datetime
+
 from boto.mturk import qualification
+from boto.mturk.connection import MTurkConnection, MTurkRequestError
 from boto.mturk.price import Price
-from logger import *
-from helpers import *
-import sys, traceback
+from boto.mturk.question import ExternalQuestion
+
+from logger import MANAGER_CONTROL, TURK_WARNING, log
+
+from .helpers import DAY, MINUTE
+
 
 def catcherror(f):
     def new_f(*args, **kwargs):
         try:
             f(*args, **kwargs)
-        except MTurkRequestError, e:
-            type, value, tb = sys.exc_info()
+        except MTurkRequestError:
+            _, value, _ = sys.exc_info()
 
             message = '----------------\n'
             message += '    WARNING\n'
@@ -25,9 +31,10 @@ def catcherror(f):
             #print 'Type: %s' % type
             #print 'Value: %s' % value
             #print 'Traceback:'
-            #traceback.print_tb(tb)
+            # traceback.print_tb(tb)
 
     return new_f
+
 
 class MTurkClient:
 
@@ -73,27 +80,31 @@ class MTurkClient:
         settings.update(extra_settings)
 
         settings['reward'] = Price(settings['reward'])
-        settings['qualifications'] = qualification.Qualifications(settings['qualifications'])
+        settings['qualifications'] = qualification.Qualifications(
+            settings['qualifications'])
         settings['keywords'] = ','.join(settings['keywords'])
         height = settings.pop('height')
 
-        hit = self.c.create_hit(question=ExternalQuestion(url, height), **settings)[0]
+        hit = self.c.create_hit(
+            question=ExternalQuestion(url, height), **settings)[0]
         #print 'Created hit %s' % hit.HITId
         return hit.HITId, hit.HITTypeId
 
-        #hit_type=None, # Let Amazon do this automatically
-        #annotation=None, # Optional annotation for our system to use
-        #questions=None, # If you want to create multiple HITs at a time? Probably irrelevant for External
-        #response_groups=None, # Unclear what this does
+        # hit_type=None, # Let Amazon do this automatically
+        # annotation=None, # Optional annotation for our system to use
+        # questions=None, # If you want to create multiple HITs at a time? Probably irrelevant for External
+        # response_groups=None, # Unclear what this does
 
     def get_hit(self, hit_id):
         return self.c.get_hit(hit_id)[0]
 
-    def hit_results(self, hit_id, type=None): # type in ['Submitted','Approved','Rejected',None]
+    # type in ['Submitted','Approved','Rejected',None]
+    def hit_results(self, hit_id, type=None):
         results = {}
 
         try:
-            assignments = self.c.get_assignments(hit_id, status=None, page_size=100)
+            assignments = self.c.get_assignments(
+                hit_id, status=None, page_size=100)
             for asst in assignments:
                 results.setdefault(asst.AssignmentId, {})
                 answers = asst.answers[0] if len(asst.answers) > 0 else []
@@ -103,10 +114,13 @@ class MTurkClient:
 
                 results[asst.AssignmentId]['worker_id'] = asst.WorkerId
 
-                results[asst.AssignmentId]['accept_time'] = datetime.strptime(asst.AcceptTime, "%Y-%m-%dT%H:%M:%SZ")
-                results[asst.AssignmentId]['submit_time'] = datetime.strptime(asst.SubmitTime, "%Y-%m-%dT%H:%M:%SZ")
+                results[asst.AssignmentId]['accept_time'] = datetime.strptime(
+                    asst.AcceptTime, "%Y-%m-%dT%H:%M:%SZ")
+                results[asst.AssignmentId]['submit_time'] = datetime.strptime(
+                    asst.SubmitTime, "%Y-%m-%dT%H:%M:%SZ")
         except:
-            log(u'Error getting assignments for HIT %s. Does this hit exist on Amazon?' % (hit_id), MANAGER_CONTROL)
+            log(u'Error getting assignments for HIT %s. Does this hit exist on Amazon?' % (
+                hit_id), MANAGER_CONTROL)
         finally:
             return results
 
