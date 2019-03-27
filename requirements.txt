@@ -8,3 +8,4 @@ django-sslserver
 django_extensions
 django-smtp-ssl
 django-pdb
+ptvsd

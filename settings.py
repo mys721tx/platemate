@@ -36,6 +36,8 @@ PYTHONVAR = "python"
 # Hostnames that users can connect to your site with.
 if DEBUG:
     ALLOWED_HOSTS = ["*"]
+    import ptvsd
+    ptvsd.enable_attach(address=('0.0.0.0', 3000))
 else:
     ALLOWED_HOSTS = ["localhost", os.getenv("HOST", "localhost")]
 
