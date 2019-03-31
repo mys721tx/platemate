@@ -13,7 +13,6 @@ class Output(manager.Output):
 
 
 class Manager(manager.Manager):
-
     def setup(self):
         self.hire(identify.describe, 'describe')
         self.hire(identify.match, 'match')

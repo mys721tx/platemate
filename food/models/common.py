@@ -3,9 +3,10 @@ from datetime import datetime
 
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import (BooleanField, CharField, DateField,
-                              DateTimeField, FloatField, ForeignKey,
-                              IntegerField, ManyToManyField, URLField)
+from django.db.models import (
+    BooleanField, CharField, DateField, DateTimeField, FloatField, ForeignKey,
+    IntegerField, ManyToManyField, URLField
+)
 
 from food.food_db import FoodDb
 from management.models.manager import Manager
@@ -15,7 +16,6 @@ try:
     import json
 except ImportError:
     import simplejson as json
-
 
 PHOTO_WIDTH = 400
 PHOTO_HEIGHT = 300
@@ -40,9 +40,11 @@ class Submission(SmartModel):
     manager = ForeignKey(Manager, related_name='submissions', null=True)
     tagged_boxes = OneOf('BoxGroup', null=True)
     identified_ingredients = ManyOf(
-        'Ingredient', related_name='identified_for_submissions')
+        'Ingredient', related_name='identified_for_submissions'
+    )
     measured_ingredients = ManyOf(
-        'Ingredient', related_name='measured_for_submissions')
+        'Ingredient', related_name='measured_for_submissions'
+    )
 
     # User answers
     manual = BooleanField(default=False)
@@ -113,7 +115,9 @@ class Submission(SmartModel):
             )
 
     def __str__(self):
-        return self.get_meal_display() + " on " + str(self.date) + " for " + self.user.username
+        return self.get_meal_display() + " on " + str(
+            self.date
+        ) + " for " + self.user.username
 
 
 class Photo(SmartModel):
@@ -164,13 +168,13 @@ class Box(SmartModel):
 
     @property
     def hypotenuse(self):
-        return math.sqrt(self.width ** 2 + self.height ** 2)
+        return math.sqrt(self.width**2 + self.height**2)
 
     @staticmethod
     def distance(box1, box2):
         x1, y1 = box1.center
         x2, y2 = box2.center
-        return math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
+        return math.sqrt((x1 - x2)**2 + (y1 - y2)**2)
 
     @property
     def center(self):
@@ -244,12 +248,12 @@ class BoxGroup(SmartModel):
             closest_box = max(boxes2, key=lambda box: -distance_pct(box1, box))
             distance_score = 1 - distance_pct(box1, closest_box)
             area_score = area_pct(box1, closest_box)
-            combined_score = distance_score ** 2 * math.sqrt(area_score)
+            combined_score = distance_score**2 * math.sqrt(area_score)
             #log('score = %.3f = %.3f sqrt(area) * %.3f distance' % (combined_score, math.sqrt(area_score), distance_score),FOOD_CONTROL)
 
             score *= combined_score
 
-        return score ** (1.0 / num_boxes)
+        return score**(1.0 / num_boxes)
 
 
 """
@@ -291,14 +295,16 @@ class Food(SmartModel):
         except ObjectDoesNotExist:
             fdb = FoodDb()
             results = fdb.search(query)
-            if not results.has_key('foods') or not results['foods'].has_key('food'):
+            if not results.has_key('foods'
+                                   ) or not results['foods'].has_key('food'):
                 results_list = []
             elif results["foods"]["total_results"] == "1":
                 results_list = [results["foods"]["food"]]
             else:
                 results_list = results["foods"]["food"]
             food_results = FoodSearchResults.from_db_results(
-                query, results_list)
+                query, results_list
+            )
         return food_results.get_results()
 
     @staticmethod
@@ -351,7 +357,12 @@ class Food(SmartModel):
                 serving_id=s["serving_id"],
             )
 
-            for nutrient in ["calories", "carbohydrate", "fat", "fiber", "protein", "saturated_fat", "sugar", "calcium", "cholesterol", "iron", "monounsaturated_fat", "polyunsaturated_fat", "potassium", "vitamin_a", "vitamin_c"]:
+            for nutrient in [
+                "calories", "carbohydrate", "fat", "fiber", "protein",
+                "saturated_fat", "sugar", "calcium", "cholesterol", "iron",
+                "monounsaturated_fat", "polyunsaturated_fat", "potassium",
+                "vitamin_a", "vitamin_c"
+            ]:
                 if nutrient in s:
                     setattr(new_serving, nutrient, s[nutrient])
 
@@ -386,7 +397,9 @@ class Serving(SmartModel):
     vitamin_c = FloatField(null=True)
 
     def __str__(self):
-        return '%s of %s (%d cal)' % (self.serving_description, self.food.food_name, self.calories)
+        return '%s of %s (%d cal)' % (
+            self.serving_description, self.food.food_name, self.calories
+        )
 
         #self.food.food_name + ': ' + self.measurement_description + ' (' + str(self.calories) + ' cal)'
 
@@ -396,10 +409,15 @@ class FoodSearchResults(SmartModel):
     search_results = ManyToManyField(Food, through='FoodSearchResult')
 
     def __str__(self):
-        return self.search_term + "(" + str(len(self.search_results.all())) + " results)"
+        return self.search_term + "(" + str(
+            len(self.search_results.all())
+        ) + " results)"
 
     def get_results(self):
-        return [r.food for r in FoodSearchResult.objects.filter(results=self).order_by('ordering')]
+        return [
+            r.food for r in
+            FoodSearchResult.objects.filter(results=self).order_by('ordering')
+        ]
 
     @staticmethod
     def from_db_results(query, results):
@@ -408,7 +426,8 @@ class FoodSearchResults(SmartModel):
         for (counter, result) in enumerate(results):
             food_item = Food.from_search_result(result)
             res = FoodSearchResult(
-                food=food_item, results=results_item, ordering=counter)
+                food=food_item, results=results_item, ordering=counter
+            )
             res.save()
         return results_item
 
@@ -443,7 +462,10 @@ class Ingredient(SmartModel):
 
     def __str__(self):
         if self.serving and self.amount:
-            return '%.2f * %s of %s = %d cal' % (self.amount, self.serving.serving_description, self.food, self.calories)
+            return '%.2f * %s of %s = %d cal' % (
+                self.amount, self.serving.serving_description, self.food,
+                self.calories
+            )
         return str(self.food)
 
 
@@ -452,7 +474,9 @@ class IngredientList(SmartModel):
     box = OneOf(Box)
 
     def __eq__(self, other):
-        return [i.food.pk for i in self.ingredients.all()] == [i.food.pk for i in other.ingredients.all()]
+        return [i.food.pk for i in self.ingredients.all()] == [
+            i.food.pk for i in other.ingredients.all()
+        ]
 
     def __str__(self):
         try:

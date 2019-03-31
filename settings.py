@@ -8,12 +8,13 @@ BASE_PATH = os.path.dirname(os.path.abspath(__file__))
 DEBUG = (lambda: os.getenv("DEBUG", "false").lower() == "true")()
 
 ADMINS = (
-    (os.getenv("ADMIN_NAME", "John Doe"), os.getenv("ADMIN_EMAIL", "user@example.com")),
+    (
+        os.getenv("ADMIN_NAME", "John Doe"),
+        os.getenv("ADMIN_EMAIL", "user@example.com")
+    ),
 )
 
-TEMPLATE_DIRS = (
-    os.path.join(BASE_PATH, "templates"),
-)
+TEMPLATE_DIRS = (os.path.join(BASE_PATH, "templates"), )
 
 STATIC_DOC_ROOT = os.path.join(BASE_PATH, "static")
 
@@ -23,7 +24,7 @@ DATABASES = {
     'default': {
         # Engines include '.postgresql_psycopg2', '.postgresql', '.mysql', '.sqlite3' or '.oracle'.
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'db.sqlite3',                      # Or path to database file if using sqlite3.
+        'NAME': 'db.sqlite3',  # Or path to database file if using sqlite3.
         #'USER': '',                      # Not used with sqlite3.
         #'PASSWORD': '',                  # Not used with sqlite3.
         #'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
@@ -141,8 +142,9 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format' : "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
-            'datefmt' : "%d/%b/%Y %H:%M:%S"
+            'format':
+            "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
+            'datefmt': "%d/%b/%Y %H:%M:%S"
         },
         'simple': {
             'format': '%(levelname)s %(message)s'
@@ -155,9 +157,9 @@ LOGGING = {
     },
     'loggers': {
         'django': {
-            'handlers':['console'],
+            'handlers': ['console'],
             'propagate': True,
-            'level':'DEBUG',
+            'level': 'DEBUG',
         },
     }
 }

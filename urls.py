@@ -16,22 +16,29 @@ urlpatterns = patterns(
     (r'^upload/(?P<day>.*)/$', 'food.views.fe_upload'),
 
     # Authentication
-    (r'^login/$', 'django.contrib.auth.views.login', {'template_name': 'fe/login.html'}),
+    (
+        r'^login/$', 'django.contrib.auth.views.login', {
+            'template_name': 'fe/login.html'
+        }
+    ),
     (r'^logout/$', 'django.contrib.auth.views.logout_then_login'),
 
     # Pipeline Data
     (r'^responses/(?P<operation>\w*)/$', 'management.views.show_responses'),
     (r'^stats/(?P<operation>\w*)/$', 'management.views.show_stats'),
-    (r'^pipeline/(?P<operation>\w*)/((?P<photo>\d+)/)?$', 'food.views.show_pipeline'),
+    (
+        r'^pipeline/(?P<operation>\w*)/((?P<photo>\d+)/)?$',
+        'food.views.show_pipeline'
+    ),
     (r'^hit_list/(?P<operation>\w*)/$', 'management.views.hit_list'),
 
     # Experiment summary
     (r'^summary/(?P<photo_id>\w*)/$', 'food.views.photo_summary'),
     # Static Content
     (
-        r'^static/(?P<path>.*)$',
-        'django.views.static.serve',
-        {'document_root': settings.STATIC_DOC_ROOT}
+        r'^static/(?P<path>.*)$', 'django.views.static.serve', {
+            'document_root': settings.STATIC_DOC_ROOT
+        }
     ),
     #(r'^admin/', include(admin.site.urls)),
 

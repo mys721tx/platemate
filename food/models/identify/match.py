@@ -40,7 +40,8 @@ class Response(turk.Response):
             box.desc = self.to_job.desc
             box.save()
             self.ingredient_list = IngredientList.from_json(
-                self.selections, box=box)
+                self.selections, box=box
+            )
 
         num = self.ingredient_list.ingredients.count()
         if num <= 4:
@@ -85,6 +86,7 @@ class Manager(manager.Manager):
             responses = job.valid_responses.all()
             self.finish(
                 ingredient_lists=[
-                    response.ingredient_list for response in responses],
+                    response.ingredient_list for response in responses
+                ],
                 from_job=job,
             )

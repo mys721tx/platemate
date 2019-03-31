@@ -21,16 +21,24 @@ class FSToken(oauth.OAuthToken):
         try:
             token.callback_confirmed = params['oauth_callback_confirmed'][0]
         except KeyError:
-            pass # 1.0, no callback confirmed.
+            pass  # 1.0, no callback confirmed.
         return token
+
     from_string = staticmethod(from_string)
+
 
 class FSRequest(oauth.OAuthRequest):
     @classmethod
     def from_consumer_and_token(
-            cls, oauth_consumer, token=None, callback=None, verifier=None,
-            http_method=oauth.HTTP_METHOD, http_url=None, parameters=None
-        ):
+        cls,
+        oauth_consumer,
+        token=None,
+        callback=None,
+        verifier=None,
+        http_method=oauth.HTTP_METHOD,
+        http_url=None,
+        parameters=None
+    ):
         """ Overridden to allow optional oauth_callback and oauth_verifier """
         if not parameters:
             parameters = {}
@@ -64,6 +72,7 @@ class FSRequest(oauth.OAuthRequest):
 def RunHTTPServer(httpd):
     httpd.serve_forever()
 
+
 class MyHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     def do_GET(self, *args):
         print args
@@ -74,6 +83,7 @@ class MyHTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             print "Added %s to tokens" % str(params)
         except:
             pass
+
 
 def WaitForPingback(timeout=45):
     httpd = BaseHTTPServer.HTTPServer(('localhost', 0), MyHTTPHandler)

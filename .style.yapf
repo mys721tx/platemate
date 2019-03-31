@@ -1,0 +1,11 @@
+[style]
+allow_split_before_default_or_named_assigns = true
+allow_split_before_dict_value = true
+arithmetic_precedence_indication = false
+based_on_style = pep8
+column_limit = 80
+dedent_closing_brackets = true
+each_dict_entry_on_separate_line = true
+join_multiple_lines = true
+split_before_logical_operator = true
+split_complex_comprehension = true

@@ -42,13 +42,14 @@ def mode(elts):
 
 
 def mean(elts):
-    return (sum(elts) + 0.0)/len(elts)
+    return (sum(elts) + 0.0) / len(elts)
 
 
 def median(elts):
     if len(elts) % 2:
         return elts[len(elts) / 2]
-    return mean(elts[len(elts) / 2: len(elts) / 2 + 1])
+    return mean(elts[len(elts) / 2:len(elts) / 2 + 1])
+
 
 # Debugging
 
@@ -56,11 +57,15 @@ def median(elts):
 def var_dump(obj):
     pprint.pprint(vars(obj))
 
+
 # Modules
 
 
 def get_models(module, base):
-    return [(name, cls) for name, cls in inspect.getmembers(module) if inspect.isclass(cls) and issubclass(cls, base)]
+    return [
+        (name, cls) for name, cls in inspect.getmembers(module)
+        if inspect.isclass(cls) and issubclass(cls, base)
+    ]
 
 
 def get_modules(dir):

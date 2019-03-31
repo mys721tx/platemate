@@ -9,8 +9,8 @@ class Output(base.Output):
     box = OneOf(Box)
     ingredient_list = OneOf(IngredientList)
 
-class Manager(base.Manager):
 
+class Manager(base.Manager):
     def setup(self):
         self.hire(identify.describe, 'describe')
 

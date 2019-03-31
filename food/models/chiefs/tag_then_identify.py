@@ -25,13 +25,12 @@ class Manager(base.Manager):
         self.hire(identify.describe_match_maybe_vote, 'identify')
 
         photo_search = os.path.join(
-            settings.STATIC_DOC_ROOT, 'photos', self.photoset, '*.jpg')
+            settings.STATIC_DOC_ROOT, 'photos', self.photoset, '*.jpg'
+        )
         for path in glob.glob(photo_search):
             filename = os.path.basename(path)
             url = '%s/static/photos/%s/%s' % (
-                settings.URL_PATH,
-                self.photoset,
-                filename
+                settings.URL_PATH, self.photoset, filename
             )
             photo = Photo.factory(photo_url=url)
             self.employee('tag').assign(photo=photo)

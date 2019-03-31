@@ -90,14 +90,15 @@ class Manager(manager.Manager):
             responses = job.valid_responses
 
             calories = [r.ingredient.calories for r in responses]
-            avg_calories = mean(sorted(calories)[1: -1])
+            avg_calories = mean(sorted(calories)[1:-1])
             avg_serving = mode([r.ingredient.serving for r in responses])
 
             i = Ingredient.factory(
                 food=job.ingredient.food,
                 box=job.ingredient.box,
                 serving=avg_serving,
-                amount=avg_calories / avg_serving.calories if avg_serving.calories else 0,
+                amount=avg_calories / avg_serving.calories
+                if avg_serving.calories else 0,
             )
 
             self.finish(ingredient=i, from_job=job)

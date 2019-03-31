@@ -11,7 +11,6 @@ from .turk import Hit, Job, Worker
 
 
 class Supervisor(object):
-
     @property
     def turk(self):
         return settings.TURK_SANDBOX if self.sandbox else settings.TURK_REAL
@@ -72,9 +71,8 @@ class Supervisor(object):
 
         # If at least one job has been waiting too long, create a HIT out of all remaining jobs
         if self.waiting_jobs:
-            earliest_job = self.waiting_jobs.aggregate(
-                Min('creation_time')
-            )['creation_time__min']
+            earliest_job = self.waiting_jobs.aggregate(Min('creation_time')
+                                                       )['creation_time__min']
             time_elapsed = datetime.now() - earliest_job
             if time_elapsed.seconds >= self.max_wait:
                 self.create_hit(self.waiting_jobs)
@@ -89,9 +87,7 @@ class Supervisor(object):
     @transaction.atomic
     def refresh_hits(self):
         log(
-            u"Refreshing HITs for {}".format(
-                self.__class__.__name__
-            ),
+            u"Refreshing HITs for {}".format(self.__class__.__name__),
             TURK_CONTROL
         )
         for jobcount in range(self.batch_size):
@@ -104,7 +100,10 @@ class Supervisor(object):
     def create_hit(self, jobs, announce=True):
         # Set up HIT settings
         settings = {}
-        for attr in ['lifetime', 'duration', 'approval_delay', 'title', 'description', 'keywords', 'reward', 'qualifications', 'height']:
+        for attr in [
+            'lifetime', 'duration', 'approval_delay', 'title', 'description',
+            'keywords', 'reward', 'qualifications', 'height'
+        ]:
             settings[attr] = getattr(self, attr)
 
         # Turn off qualifications on sandbox so we can play with the HITs
@@ -131,20 +130,15 @@ class Supervisor(object):
         hit.save()
 
         if announce:
-            log(u"""Created HIT {} with {} jobs and {} assignments
+            log(
+                u"""Created HIT {} with {} jobs and {} assignments
                 External URL: {}
                 Turk ID: {}
                 Turk URL: {}
                 Type: {}""".format(
-                    hit.id,
-                    len(jobs),
-                    self.duplication,
-                    hit.external_url,
-                    hit.turk_id,
-                    hit.turk_url,
-                    self.__class__.__name__
-                ),
-                MANAGER_CONTROL
+                    hit.id, len(jobs), self.duplication, hit.external_url,
+                    hit.turk_id, hit.turk_url, self.__class__.__name__
+                ), MANAGER_CONTROL
             )
 
         # TODO(jon): error handling
@@ -181,11 +175,8 @@ class Supervisor(object):
 
             log(
                 u'Recording assignment {} on HIT {} from worker {}...'.format(
-                    asst.turk_id,
-                    hit.turk_id,
-                    worker.turk_id
-                ),
-                MANAGER_CONTROL
+                    asst.turk_id, hit.turk_id, worker.turk_id
+                ), MANAGER_CONTROL
             )
 
             responses = {}
@@ -193,8 +184,7 @@ class Supervisor(object):
                 job_id, field = key.split('_', 1)
                 job = hit.jobs.get(pk=job_id)
                 responses[job_id] = responses.get(
-                    job_id,
-                    self.Response(assignment=asst, job=job)
+                    job_id, self.Response(assignment=asst, job=job)
                 )
                 setattr(responses[job_id], field, value)
                 log(u"  %s_%s = []" % (job_id, field), MANAGER_CONTROL)
@@ -216,20 +206,15 @@ class Supervisor(object):
         if asst.valid:
             self.turk.approve(asst.turk_id, asst.feedback)
             asst.approved = True
-            log(
-                u'Approved assignment {}'.format(asst.turk_id),
-                MANAGER_CONTROL
-            )
+            log(u'Approved assignment {}'.format(asst.turk_id), MANAGER_CONTROL)
         else:
             self.turk.reject(asst.turk_id, asst.feedback)
             # self.turk.extend_hit(asst.hit.turk_id, 1) Commented out because generally hits are rejected because of bad photo data, don't want hit to advance.
             asst.approved = False
             log(
                 u'Rejected assignment {} because {}'.format(
-                    asst.turk_id,
-                    asst.feedback
-                ),
-                MANAGER_CONTROL
+                    asst.turk_id, asst.feedback
+                ), MANAGER_CONTROL
             )
         asst.save()
 

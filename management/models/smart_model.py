@@ -27,7 +27,9 @@ class SmartMetaclass(DowncastMetaclass):
         category = path[-2]
 
         # Just for managers
-        if name in ['Manager', 'Input', 'Output', 'Job', 'Response'] and app != 'management':
+        if name in [
+            'Manager', 'Input', 'Output', 'Job', 'Response'
+        ] and app != 'management':
             if name == 'Manager':
                 m = sys.modules[attrs['__module__']]
                 attrs['Response'] = getattr(m, 'Response', None)
@@ -49,9 +51,8 @@ class SmartMetaclass(DowncastMetaclass):
 
         # if name in ['Job','Response','Input','Output']:
         attrs['_fields'] = [
-            (field_name, value)
-            for (field_name, value) in attrs.items()
-            if hasattr(value, '__class__') and issubclass(value.__class__, Field)
+            (field_name, value) for (field_name, value) in attrs.items() if
+            hasattr(value, '__class__') and issubclass(value.__class__, Field)
         ]
 
         # Lets us split modules into different files
@@ -81,7 +82,6 @@ class SmartModel(Model):
 
 
 class OneOf(ForeignKey):
-
     def __init__(self, *args, **kwargs):
         kwargs['related_name'] = '+'
         kwargs['null'] = True
@@ -89,7 +89,6 @@ class OneOf(ForeignKey):
 
 
 class ManyOf(ManyToManyField):
-
     def __init__(self, *args, **kwargs):
         # if 'related_name' not in kwargs:
         #    kwargs['related_name'] = '+'

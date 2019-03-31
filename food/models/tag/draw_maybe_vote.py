@@ -18,7 +18,6 @@ class Output(manager.Output):
 
 
 class Manager(manager.Manager):
-
     def setup(self):
         self.hire(tag.box_draw, 'draw')
         self.hire(tag.box_vote, 'vote')
@@ -33,14 +32,18 @@ class Manager(manager.Manager):
 
             # If responses are similar enough, don't bother voting
             if similarity > MIN_SIMILARITY:
-                log('Box groups have similarity %.2f so skipping vote' %
-                    similarity, FOOD_CONTROL)
+                log(
+                    'Box groups have similarity %.2f so skipping vote' %
+                    similarity, FOOD_CONTROL
+                )
                 self.finish(box_group=bg1)
 
             # Otherwise, we need to vote
             else:
-                log('Box groups have similarity %.2f so voting' %
-                    similarity, FOOD_CONTROL)
+                log(
+                    'Box groups have similarity %.2f so voting' % similarity,
+                    FOOD_CONTROL
+                )
                 self.employee('vote').assign(box_groups=[bg1, bg2])
 
         for output in self.employee('vote').finished:

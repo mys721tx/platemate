@@ -10,13 +10,16 @@ try:
 except ImportError:
     import simplejson as json
 
+
 class FatSecretClient(object):
     SERVER = 'platform.fatsecret.com'
     PORT = 80
     SIGNER = oauth.OAuthSignatureMethod_HMAC_SHA1()
     HTTP_METHOD = 'GET'
     HTTP_HEADERS = {}
-    HTTP_HEADERS_POST = {"Content-type": "application/x-www-form-urlencoded", }
+    HTTP_HEADERS_POST = {
+        "Content-type": "application/x-www-form-urlencoded",
+    }
     HTTP_HEADERS_GET = {}
     HTTP_URL = 'http://platform.fatsecret.com/rest/server.api'
     HTTP_RELURL = 'rest/server.api'
@@ -28,8 +31,12 @@ class FatSecretClient(object):
     class _MethodProxy(object):
         def __init__(self, client, path):
             self.__client, self.__path = client, path
+
         def __getattr__(self, name):
-            return FatSecretClient._MethodProxy(self.__client, self.__path + '.' + name)
+            return FatSecretClient._MethodProxy(
+                self.__client, self.__path + '.' + name
+            )
+
         def __call__(self, *args, **kwargs):
             return self.request(self.__path, *args, **kwargs)
 
@@ -59,7 +66,7 @@ class FatSecretClient(object):
 
     def getUserAuthentication(self, token):
         import webbrowser
-        webbrowser.open('%s?%s'%(self.OAUTH_UAUTH_URL, token))
+        webbrowser.open('%s?%s' % (self.OAUTH_UAUTH_URL, token))
         return raw_input('Enter verification code: ')
 
     def authorizeRequestToken(self, verifier):
@@ -76,7 +83,7 @@ class FatSecretClient(object):
     __methods__ = {
         'food.add_favorite': AUTH_DELEGATE,
         'food.delete_favorite': AUTH_DELEGATE,
-        'food.get':  AUTH_SIGNED,
+        'food.get': AUTH_SIGNED,
         'foods.get_favorites': AUTH_DELEGATE,
         'foods.get_most_eaten': AUTH_DELEGATE,
         'foods.get_recently_eaten': AUTH_DELEGATE,
@@ -114,6 +121,7 @@ class FatSecretClient(object):
         'weight.update': AUTH_SIGNED,
         'weights.get_month': AUTH_DELEGATE,
     }
+
     def __init__(self):
         self.application = None
         self.token = None
@@ -142,13 +150,17 @@ class FatSecretClient(object):
         return self
 
     def connect(self):
-        self.connection = httplib.HTTPConnection('%s:%d'%(self.SERVER, self.PORT))
+        self.connection = httplib.HTTPConnection(
+            '%s:%d' % (self.SERVER, self.PORT)
+        )
         return self
 
     def setApplication(self, application):
-        assert (issubclass(application, FatSecretApplication) or
-                isinstance(application, FatSecretApplication) or
-                application == None)
+        assert (
+            issubclass(application, FatSecretApplication)
+            or isinstance(application, FatSecretApplication)
+            or application == None
+        )
 
         if application:
             assert application.key != None
@@ -160,7 +172,7 @@ class FatSecretClient(object):
 
     def setToken(self, token):
         assert (isinstance(token, oauth.OAuthToken) or token == None)
-        self.token = token;
+        self.token = token
         self._adjustAuthLevel()
         return self
 
@@ -174,8 +186,10 @@ class FatSecretClient(object):
 
     def getMethods(self, current_auth=None):
         current_auth = current_auth or self.getCurrentAuthLevel()
-        return [method for method, required_auth in self.__methods__.iteritems()
-                if required_auth <= current_auth]
+        return [
+            method for method, required_auth in self.__methods__.iteritems()
+            if required_auth <= current_auth
+        ]
 
     def getCurrentAuthLevel(self):
         return self._authLevel
@@ -216,7 +230,7 @@ class FatSecretClient(object):
 
         # Build HTTP Headers from OAuth + POST (if necessary)
         headers = req.to_header()
-        headers.update(getattr(self, 'HTTP_HEADERS_%s'%self.HTTP_METHOD))
+        headers.update(getattr(self, 'HTTP_HEADERS_%s' % self.HTTP_METHOD))
 
         # Customize httplib parameters as necessary
         if self.HTTP_METHOD in ['POST']:
@@ -231,10 +245,7 @@ class FatSecretClient(object):
         arrived = False
         while not arrived and follow_redirects:
             self.connection.request(
-                req.http_method,
-                http_url,
-                postdata,
-                headers
+                req.http_method, http_url, postdata, headers
             )
             resp = self.connection.getresponse()
             if resp.status in [301, 307]:
@@ -284,12 +295,7 @@ class FatSecretClient(object):
             postdata = None
 
         # Make the request
-        self.connection.request(
-            req.http_method,
-            http_url,
-            postdata,
-            headers
-        )
+        self.connection.request(req.http_method, http_url, postdata, headers)
         resp = self.connection.getresponse()
 
         # Post-process the result
@@ -297,7 +303,8 @@ class FatSecretClient(object):
         _rp = self._rpath
         if 'error' in result:
             raise BuildError(result)
-        if _rp(result, 'profile', 'auth_token') and _rp(result, 'profile', 'auth_secret'):
+        if _rp(result, 'profile',
+               'auth_token') and _rp(result, 'profile', 'auth_secret'):
             self.setToken(
                 FSToken(
                     _rp(result, 'profile', 'auth_token').encode('utf8'),
@@ -306,6 +313,7 @@ class FatSecretClient(object):
             )
 
         return result
+
 
 class FatSecretApplication(oauth.OAuthConsumer):
     def __init__(self):

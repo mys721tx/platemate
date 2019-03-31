@@ -25,7 +25,6 @@ class Output(SmartModel):
 
 
 class Manager(SmartModel, Supervisor):
-
     @property
     def level(self):
         if self.name == 'chief':

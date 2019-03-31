@@ -7,38 +7,50 @@ class FatSecretError(ValueError):
     def __str__(self):
         return 'Error %d: %s' % (self.errorCode, self.errorMessage)
 
+
 class FatSecretAuthError(FatSecretError):
     pass
+
 
 class FatSecretOAuthError(FatSecretAuthError):
     pass
 
+
 class FatSecretApplicationError(FatSecretOAuthError):
     pass
+
 
 class FatSecretUsageError(FatSecretError):
     pass
 
+
 class FatSecretUnknownMethodError(FatSecretError):
     pass
+
 
 class FatSecretInvalidParameterError(FatSecretUsageError):
     pass
 
+
 class FatSecretInvalidRangeError(FatSecretInvalidParameterError):
     pass
+
 
 class FatSecretInvalidIDError(FatSecretInvalidParameterError):
     pass
 
+
 class FatSecretInvalidTypeError(FatSecretInvalidParameterError):
     pass
+
 
 class FatSecretInvalidActivityError(FatSecretInvalidParameterError):
     pass
 
+
 class FatSecretInvalidTemplateError(FatSecretInvalidActivityError):
     pass
+
 
 __ERROR_LOOKUP__ = {
     2: FatSecretOAuthError,
@@ -61,11 +73,8 @@ __ERROR_LOOKUP__ = {
     206: FatSecretInvalidRangeError
 }
 
+
 def BuildError(result):
     cls = FatSecretError
     cls = __ERROR_LOOKUP__.get(result['error']['code'], FatSecretError)
-    return cls(
-        result['error']['code'],
-        result['error']['message'],
-        result
-    )
+    return cls(result['error']['code'], result['error']['message'], result)

@@ -1,7 +1,8 @@
 from django.conf import settings
-from django.db.models import (BooleanField, CharField, DateTimeField,
-                              ForeignKey, GenericIPAddressField,
-                              ManyToManyField, NullBooleanField, TextField)
+from django.db.models import (
+    BooleanField, CharField, DateTimeField, ForeignKey, GenericIPAddressField,
+    ManyToManyField, NullBooleanField, TextField
+)
 
 from .smart_model import SmartModel
 
@@ -46,6 +47,7 @@ class Hit(SmartModel):
     def reviewable_assignments(self):
         return self.assignments.filter(approved=None)
 
+
 class Job(SmartModel):
     hit = ForeignKey('Hit', related_name='jobs', null=True, blank=True)
     manager = ForeignKey('Manager', related_name='jobs', null=True)
@@ -61,6 +63,7 @@ class Job(SmartModel):
     def valid_response(self):
         return self.valid_responses.all()[0]
 
+
 class Worker(SmartModel):
     turk_id = CharField(max_length=20)
     ip = GenericIPAddressField(null=True)
@@ -73,6 +76,7 @@ class Worker(SmartModel):
             return self.turk_id
         except:
             return "<Worker object>"
+
 
 class Assignment(SmartModel):
     turk_id = CharField(max_length=100)
@@ -110,6 +114,7 @@ class Assignment(SmartModel):
             return responses[0].feedback
         return "You didn't provide any response."
 
+
 class Response(SmartModel):
     assignment = ForeignKey('Assignment', related_name='responses')
     job = ForeignKey(Job, related_name='responses')
@@ -119,7 +124,9 @@ class Response(SmartModel):
 
     def __str__(self):
         try:
-            return "%d from %s on %s: %s" % (self.pk, self.assignment, self.job, self.raw)
+            return "%d from %s on %s: %s" % (
+                self.pk, self.assignment, self.job, self.raw
+            )
         except:
             return "<Response object>"
 

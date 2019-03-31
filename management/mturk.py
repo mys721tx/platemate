@@ -48,26 +48,18 @@ class MTurkClient:
         else:
             self.host = 'mechanicalturk.amazonaws.com'
 
-        self.c = MTurkConnection(
-            aws_access_key,
-            aws_secret_key,
-            host=self.host
-        )
+        self.c = MTurkConnection(aws_access_key, aws_secret_key, host=self.host)
 
     default_settings = {
         'lifetime': DAY,
         'duration': 10 * MINUTE,
         'approval_delay': DAY,
-
         'title': "[title]",
         'description': "[description]",
         'keywords': [],
-
         'reward': 0.01,
         'max_assignments': 1,
-
         'height': 700,
-
         'qualifications': [],
     }
 
@@ -81,12 +73,14 @@ class MTurkClient:
 
         settings['reward'] = Price(settings['reward'])
         settings['qualifications'] = qualification.Qualifications(
-            settings['qualifications'])
+            settings['qualifications']
+        )
         settings['keywords'] = ','.join(settings['keywords'])
         height = settings.pop('height')
 
         hit = self.c.create_hit(
-            question=ExternalQuestion(url, height), **settings)[0]
+            question=ExternalQuestion(url, height), **settings
+        )[0]
         #print 'Created hit %s' % hit.HITId
         return hit.HITId, hit.HITTypeId
 
@@ -104,7 +98,8 @@ class MTurkClient:
 
         try:
             assignments = self.c.get_assignments(
-                hit_id, status=None, page_size=100)
+                hit_id, status=None, page_size=100
+            )
             for asst in assignments:
                 results.setdefault(asst.AssignmentId, {})
                 answers = asst.answers[0] if len(asst.answers) > 0 else []
@@ -115,12 +110,16 @@ class MTurkClient:
                 results[asst.AssignmentId]['worker_id'] = asst.WorkerId
 
                 results[asst.AssignmentId]['accept_time'] = datetime.strptime(
-                    asst.AcceptTime, "%Y-%m-%dT%H:%M:%SZ")
+                    asst.AcceptTime, "%Y-%m-%dT%H:%M:%SZ"
+                )
                 results[asst.AssignmentId]['submit_time'] = datetime.strptime(
-                    asst.SubmitTime, "%Y-%m-%dT%H:%M:%SZ")
+                    asst.SubmitTime, "%Y-%m-%dT%H:%M:%SZ"
+                )
         except:
-            log(u'Error getting assignments for HIT %s. Does this hit exist on Amazon?' % (
-                hit_id), MANAGER_CONTROL)
+            log(
+                u'Error getting assignments for HIT %s. Does this hit exist on Amazon?'
+                % (hit_id), MANAGER_CONTROL
+            )
         finally:
             return results
 
@@ -160,7 +159,9 @@ class MTurkClient:
         return self.c.unblock_worker(worker_id, feedback)
 
     def bonus(self, asst, amount, feedback):
-        return self.c.grant_bonus(asst.worker, asst.asst_id, Price(amount), feedback)
+        return self.c.grant_bonus(
+            asst.worker, asst.asst_id, Price(amount), feedback
+        )
 
     # STATUS / DIAGNOSTICS
     # --------------------

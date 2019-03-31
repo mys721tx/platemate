@@ -8,7 +8,11 @@ from .models.common import Box, BoxGroup, Ingredient, User
 
 
 def is_authenticated_api_request(request):
-    return ('HTTP_X_API_KEY' in request.META and request.META['HTTP_X_API_KEY'] == settings.API_KEY)
+    return (
+        'HTTP_X_API_KEY' in request.META
+        and request.META['HTTP_X_API_KEY'] == settings.API_KEY
+    )
+
 
 def create_or_get_api_user():
     api_user_name = platemate_constants.API_USER_NAME
@@ -18,6 +22,7 @@ def create_or_get_api_user():
     api_user = User(username=api_user_name)
     api_user.save()
     return api_user
+
 
 def process_photo_and_get_url(photo, sub_dir, photo_name):
     photo_dir_name = os.path.join(settings.STATIC_DOC_ROOT, sub_dir)
@@ -52,8 +57,11 @@ def process_photo_and_get_url(photo, sub_dir, photo_name):
     out_path = os.path.join(out_dir, photo_name)
     smaller.save(out_path)
 
-    saved_photo_url = '%s/static/%s/resized/%s' % (settings.URL_PATH, sub_dir, photo_name)
+    saved_photo_url = '%s/static/%s/resized/%s' % (
+        settings.URL_PATH, sub_dir, photo_name
+    )
     return saved_photo_url
+
 
 def get_data_for_submission(submission):
     photo = submission.photo
@@ -76,17 +84,28 @@ def get_data_for_submission(submission):
                 food_entry = {
                     'description': k.food_name,
                 }
-                food_entry['calories'] = round(sum([e.serving.calories * e.amount for e in v]) / num_entry, 1)
-                food_entry['fat'] = round(sum([e.serving.fat * e.amount for e in v]) / num_entry, 1)
-                food_entry['carbohydrate'] = round(sum([e.serving.carbohydrate * e.amount for e in v]) / num_entry, 1)
-                food_entry['protein'] = round(sum([e.serving.protein * e.amount for e in v]) / num_entry, 1)
+                food_entry['calories'] = round(
+                    sum([e.serving.calories * e.amount for e in v]) / num_entry,
+                    1
+                )
+                food_entry['fat'] = round(
+                    sum([e.serving.fat * e.amount for e in v]) / num_entry, 1
+                )
+                food_entry['carbohydrate'] = round(
+                    sum([e.serving.carbohydrate * e.amount
+                         for e in v]) / num_entry, 1
+                )
+                food_entry['protein'] = round(
+                    sum([e.serving.protein * e.amount for e in v]) / num_entry,
+                    1
+                )
 
                 ingredient_list.append(food_entry)
 
             box['ingredients'] = ingredient_list
 
             ingredient_boxes.append(box)
-    data = {'calories':0, 'fat':0, 'carbohydrate':0, 'protein':0}
+    data = {'calories': 0, 'fat': 0, 'carbohydrate': 0, 'protein': 0}
     for b in ingredient_boxes:
         for i in b['ingredients']:
             data['calories'] += i['calories']
@@ -94,6 +113,7 @@ def get_data_for_submission(submission):
             data['carbohydrate'] += i['carbohydrate']
             data['protein'] += i['protein']
     return data
+
 
 def get_status_for_submission(submission):
     is_completed = submission.check_completed()

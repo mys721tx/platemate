@@ -15,6 +15,7 @@ from management.models.smart_model import OneOf
 class Output(manager.Output):
     ingredient_list = OneOf(IngredientList)
 
+
 class Manager(manager.Manager):
 
     photoset = CharField(max_length=100)
@@ -25,7 +26,9 @@ class Manager(manager.Manager):
         self.hire(measure.estimate, 'measure')
 
         # Loop over each photo in the folder
-        photo_search = os.path.join(settings.STATIC_DOC_ROOT, 'uploaded', self.photoset, '*.jpg')
+        photo_search = os.path.join(
+            settings.STATIC_DOC_ROOT, 'uploaded', self.photoset, '*.jpg'
+        )
         photos = []
         for path in glob.glob(photo_search):
 
@@ -39,7 +42,9 @@ class Manager(manager.Manager):
             smaller = original.resize(new_size, Image.ANTIALIAS)
 
             # Save it to photos directory
-            out_dir = os.path.join(settings.STATIC_DOC_ROOT, 'photos', self.photoset)
+            out_dir = os.path.join(
+                settings.STATIC_DOC_ROOT, 'photos', self.photoset
+            )
             try:
                 os.makedirs(out_dir)
             except os.error:
@@ -50,7 +55,9 @@ class Manager(manager.Manager):
 
             # Build a photo object
             print "photoset:", self.photoset
-            url = '%s/static/photos/%s/%s' % (settings.URL_PATH, self.photoset, filename)
+            url = '%s/static/photos/%s/%s' % (
+                settings.URL_PATH, self.photoset, filename
+            )
             photos += [Photo.factory(photo_url=url)]
 
         random.shuffle(photos)

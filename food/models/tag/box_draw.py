@@ -34,7 +34,8 @@ class Response(turk.Response):
             return True
         else:
             self.box_group = BoxGroup.from_json(
-                self.box_group_json, photo=self.to_job.photo)
+                self.box_group_json, photo=self.to_job.photo
+            )
 
         # Remove duplicates
         boxes = self.box_group.boxes.all()[:]
@@ -65,7 +66,7 @@ class Response(turk.Response):
             # return "No boxes drawn"
             return True
         else:
-            return True # why?
+            return True  # why?
 
 
 class Manager(manager.Manager):

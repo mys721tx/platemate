@@ -29,7 +29,8 @@ class Response(turk.Response):
             return "No choice of ingredients provided"
         try:
             self.ingredient_list = IngredientList.objects.get(
-                pk=self.ingredients_choice)
+                pk=self.ingredients_choice
+            )
         except ObjectDoesNotExist:
             return "Invalid choice entered"
 
@@ -71,12 +72,10 @@ class Manager(manager.Manager):
 
             if self.duplication > 1:
                 choices = [
-                    response.ingredient_list for response in job.valid_responses]
+                    response.ingredient_list for response in job.valid_responses
+                ]
                 il = mode(choices)
             else:
                 il = job.valid_response.ingredient_list
 
-            self.finish(
-                ingredient_list=il,
-                from_job=job
-            )
+            self.finish(ingredient_list=il, from_job=job)
