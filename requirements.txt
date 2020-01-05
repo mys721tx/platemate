@@ -14,7 +14,7 @@ httpagentparser==1.8.2
 idna==2.8
 jmespath==0.9.4
 oauth==1.0.1
-Pillow==6.0.0
+Pillow==6.2.0
 postgres==2.2.1
 psycopg2==2.7.1
 python-dateutil==2.8.0
